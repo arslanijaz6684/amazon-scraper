@@ -52,20 +52,24 @@ class FileController extends Controller
         try {
             $asins = AsinsData::where(function ($query) {
                 $query->whereNull('manufacturer')->orWhereNull('responsible');
-            })->selectRaw('asin as ASIN')->get()->toArray();
-            $result = $this->scraperService->processAsins($asins);
-            $result = collect($result)->map(function ($item) {
-                if (count($item['manufacturer']) === 0) {
-                    $item['manufacturer'] = $this->getEmptyData();
-                }
-                if (count($item['responsible']) === 0) {
-                    $item['responsible'] = $this->getEmptyData();
-                }
-                $item['manufacturer'] = json_encode($item['manufacturer'] ?? []);
-                $item['responsible'] = json_encode($item['responsible'] ?? []);
-                return $item;
-            })->toArray();
-            AsinsData::upsert($result, ['asin'], ['manufacturer', 'responsible']);
+            })->selectRaw('asin as ASIN')->limit(100)->get()->toArray();
+            if (count($asins) > 0) {
+                $result = $this->scraperService->processAsins($asins);
+                $result = collect($result)->map(function ($item) {
+                    if (count($item['manufacturer']) === 0) {
+                        $item['manufacturer'] = $this->getEmptyData();
+                    }
+                    if (count($item['responsible']) === 0) {
+                        $item['responsible'] = $this->getEmptyData();
+                    }
+                    $item['manufacturer'] = json_encode($item['manufacturer'] ?? []);
+                    $item['responsible'] = json_encode($item['responsible'] ?? []);
+                    return $item;
+                })->toArray();
+                AsinsData::upsert($result, ['asin'], ['manufacturer', 'responsible']);
+            }else{
+                return back()->with(['success' => 'All ASINs data already fetched/']);
+            }
             return back()->with(['success' => 'ASINs fetched successfully']);
         } catch (\Throwable $e) {
             return back()->with(['error' => 'ASINs Processing Failed. Error: ' . $e->getMessage() . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine()]);
