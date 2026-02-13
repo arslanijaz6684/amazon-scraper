@@ -82,5 +82,17 @@
         </div>
     </div>
 </div>
+
+<script>
+    setInterval(async () => {
+        const res = await fetch(`/scrape-status`);
+        const data = await res.json();
+        console.log('Job status:', data.status);
+        if(data.status === 'done') {
+            console.log('Results:', data.status);
+            clearInterval(this);
+        }
+    }, 5000);
+</script>
 </body>
 </html>

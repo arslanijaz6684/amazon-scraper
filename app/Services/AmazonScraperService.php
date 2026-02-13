@@ -19,11 +19,16 @@ class AmazonScraperService
         }
         // Data you want to send to Node.js
         $dataToSend = json_encode($asins);
+        $tempFile = storage_path('app/asins.json');
+
+        file_put_contents($tempFile, $dataToSend);
+
         $scriptPath = base_path('scripts/scrape.js');
 
         // Method using shell_exec for simplicity:
-        $command = "node \"$scriptPath\" 2>&1 " . addslashes($dataToSend);
+        $command = "node \"$scriptPath\"  \"$tempFile\" 2>&1";
         $output = shell_exec($command);
+        Log::info($output);
         return json_decode($output, true);
     }
 }

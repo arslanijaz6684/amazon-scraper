@@ -1,13 +1,22 @@
 import puppeteer from 'puppeteer';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-const asins = process.argv[2];
+import fs from 'fs';
+const filePath = process.argv[2];
 let responsible;
 let responsibleSelector;
 let elements,data;
 let manufacturer;
 let manufacturerSelector
 let responsibleSection,manufacturerSection;
+if (!filePath) {
+    console.error("No file path provided");
+    process.exit(1);
+}
+
+let asins = fs.readFileSync(filePath,'utf-8');
+
+// let asins = JSON.parse(rawData);
 
 async function scrapeASINs(dataList) {
     dataList = JSON.parse(dataList);

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Exports\AsinDataExport;
+use App\Jobs\ScrapeAmazonJob;
 use App\Models\AsinsData;
+use App\Models\ScrapeJob;
 use App\Services\AmazonScraperService;
 use App\Services\ExcelService;
 use Illuminate\Http\Request;
@@ -52,25 +54,18 @@ class FileController extends Controller
         try {
             $asins = AsinsData::where(function ($query) {
                 $query->whereNull('manufacturer')->orWhereNull('responsible');
-            })->selectRaw('asin as ASIN')->limit(100)->get()->toArray();
+            })->selectRaw('asin as ASIN')->get()->toArray();
             if (count($asins) > 0) {
-                $result = $this->scraperService->processAsins($asins);
-                $result = collect($result)->map(function ($item) {
-                    if (count($item['manufacturer']) === 0) {
-                        $item['manufacturer'] = $this->getEmptyData();
-                    }
-                    if (count($item['responsible']) === 0) {
-                        $item['responsible'] = $this->getEmptyData();
-                    }
-                    $item['manufacturer'] = json_encode($item['manufacturer'] ?? []);
-                    $item['responsible'] = json_encode($item['responsible'] ?? []);
-                    return $item;
-                })->toArray();
-                AsinsData::upsert($result, ['asin'], ['manufacturer', 'responsible']);
+                // Create a scrape job entry
+                $jobEntry = ScrapeJob::create(['status' => 'pending']);
+
+                // Dispatch the Job with job ID
+                ScrapeAmazonJob::dispatch($jobEntry->id,$asins);
+                session()->put('scrape_job_id', $jobEntry->id);
+                return back()->with(['success' => 'Scraping started!']);
             }else{
-                return back()->with(['success' => 'All ASINs data already fetched/']);
+                return back()->with(['success' => 'All ASINs data already fetched.']);
             }
-            return back()->with(['success' => 'ASINs fetched successfully']);
         } catch (\Throwable $e) {
             return back()->with(['error' => 'ASINs Processing Failed. Error: ' . $e->getMessage() . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine()]);
         }
@@ -109,15 +104,5 @@ class FileController extends Controller
             echo $e->getMessage();
             return back()->with(['error' => ' Error: ' . $e->getMessage() . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine()]);
         }
-    }
-
-    private function getEmptyData()
-    {
-        return [
-            'name ' => 'Not available',
-            'address ' => 'Not available',
-            'phone ' => 'Not available',
-            'email ' => 'Not available'
-        ];
     }
 }
