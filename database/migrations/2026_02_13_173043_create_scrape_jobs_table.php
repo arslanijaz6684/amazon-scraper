@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('scrape_jobs', function (Blueprint $table) {
             $table->id();
             $table->enum('status', ['pending', 'processing', 'done', 'failed'])->default('pending');
+            $table->json('response')->nullable();
             $table->timestamps();
         });
     }
