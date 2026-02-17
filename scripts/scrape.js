@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+// import puppeteer from 'puppeteer';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import fs from 'fs';
@@ -22,7 +22,7 @@ let asins = fs.readFileSync(filePath, 'utf-8');
 async function scrapeASINs(dataList) {
     dataList = JSON.parse(dataList);
 
-    const browser = await puppeteer.launch({headless: true});
+    // const browser = await puppeteer.launch({headless: true});
     const excelData = [];
 
     try {
@@ -85,7 +85,11 @@ async function scrapeASINs(dataList) {
                 };
                 let requestBody = {asin};
                 // Await the axios response
-                let response = await axios.post(url, requestBody, {headers});
+                let response = await axios.post(url, requestBody, {
+                    headers,
+                    timeout: 30000,
+                    validateStatus: () => true
+                });
                 // Parse the response with Cheerio
                 let $ = cheerio.load(response.data);
                 // Extract responsible person info
@@ -168,9 +172,9 @@ async function scrapeASINs(dataList) {
 
     } catch (error) {
         console.error(`An unexpected error occurred: ${error.message}`);
-    } finally {
+    } /*finally {
         await browser.close();
-    }
+    }*/
 }
 
 function detectData(data) {
@@ -201,4 +205,12 @@ function detectData(data) {
 }
 
 // console.error(asins)
-scrapeASINs(asins).then(r => console.log(JSON.stringify(r)));
+scrapeASINs(asins)
+    .then(r => {
+        console.log(JSON.stringify(r));
+        process.exit(0);
+    })
+    .catch(err => {
+        console.error(err);
+        process.exit(1);
+    });

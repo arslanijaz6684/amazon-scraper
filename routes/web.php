@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\FileController;
+use App\Jobs\ScrapeAmazonJob;
+use App\Models\AsinsData;
 use App\Models\ScrapeJob;
+use App\Services\AmazonScraperService;
 use Illuminate\Support\Facades\Route;
 
 Route::controller(FileController::class)->group(function () {
@@ -17,6 +20,22 @@ Route::controller(FileController::class)->group(function () {
         }else{
             return response()->json(['status' => '404']);
         }
+
+    });
+
+    Route::get('/test', function(AmazonScraperService $scraperService) {
+        $asins = AsinsData::where(function ($query) {
+            $query->whereNull('manufacturer')->orWhereNull('responsible');
+        })->selectRaw('asin as ASIN')->get()->toArray();
+        $data = array_chunk($asins, 100);
+        $results = [];
+        foreach ($data as $asins) {
+            $result = $scraperService->processAsins($asins);
+            $results = array_merge($results, $result);
+            \Log::info('Scrap Data: ', $result);
+        }
+        dd($result);
+        // Dispatch the Job with job ID
 
     });
 });
