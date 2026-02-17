@@ -36,6 +36,7 @@ class ScrapeAmazonJob implements ShouldQueue
             $results = [];
             foreach ($data as $asins) {
                 $result = $scraperService->processAsins($asins);
+                sleep(5);
                 \Log::info('Scrap Data: ', $result);
                 $results = array_merge($results, $result);
             }

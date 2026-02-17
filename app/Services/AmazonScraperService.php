@@ -25,6 +25,7 @@ class AmazonScraperService
             // Method using shell_exec for simplicity:
             $command = "node \"$scriptPath\"  \"$tempFile\" 2>&1";
             $output = shell_exec($command);
+            Log::info($output);
             $data = json_decode($output, true);
             if (is_array($data)) {
                 return $data;
@@ -33,7 +34,7 @@ class AmazonScraperService
             }
         } catch (\Throwable $exception) {
             Log::error($exception->getMessage());
-            return [];
+            return [$exception->getMessage()];
         }
     }
 }

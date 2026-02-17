@@ -28,9 +28,9 @@ class ScrapAmazonCommand extends Command
             $this->info('Processing: ' . $i);
             $result = $scraperService->processAsins($asins);
             $this->info('Finish Processing: ' . $i++);
-            $this->info('Result: ' . json_encode($result));
             $results = array_merge($results, $result);
-            \Log::info('Scrap Data: ', $result);
+            sleep(5);
         }
+        \Log::warning('Scrap Data: ', $results);
     }
 }
