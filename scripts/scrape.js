@@ -44,7 +44,7 @@ async function processAsin(item, excelData) {
     if (!asin) return;
     const headers = {
         'accept': 'text/html, application/json',
-        'accept-language': 'en-GB,en;q=0.9,be;q=0.8,ur;q=0.7',
+        'accept-language': getRandomLang(),
         'content-type': 'application/json',
         'device-memory': '8',
         'downlink': '4.25',
@@ -69,6 +69,8 @@ async function processAsin(item, excelData) {
         'cookie': 'session-id=261-5758951-0539711; session-id-time=2082787201l; i18n-prefs=EUR; lc-acbde=en_GB; sp-cdn="L5Z9:PK"; ubid-acbde=261-5393323-8128104; session-token=RVuGuCOz7rQrxfHb0cosNpD+u0bC7roD/2RaAnDtCXh9SGiSIzUEOGPNsdMo2/H607FyEYsyMy+zh8u/i3tXuhqUwki7bkMx1KYf8OFrr2SJsalca8qxe10aZmm1dq7UEZS1hA2CdN9EWE2sQGmHnBWb84YWuoPtFhBCv5BZGpWM42S8PYSiGlorZaav0JYEgUqVWCpJZpB13sq6Guy8C9wIrEjHGn2EtYaCj8PQiyZpQTF7qHQub3QSq517SaSOk+j8adBQPOeCOakcSgveJjTU/9y6sOi00KHadgZG4/x7rs5jm+ItnQBK1JoS81IGX2nsX4gCLycCjInxx9FUXE17K9oU4wil',
         'Referer': 'https://www.amazon.de/dp/B0BJ1Q3HWZ?th=1',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
+        "User-Agent": getRandomUA(),
+        "Connection": getRandomConnection(),
 
         'accept-ch' : 'ect,rtt,downlink,device-memory,sec-ch-device-memory,viewport-width,sec-ch-viewport-width,dpr,sec-ch-dpr,sec-ch-ua-full-version-list,sec-ch-ua-platform,sec-ch-ua-platform-version',
         'accept-ch-lifetime' : '86400',
@@ -79,7 +81,6 @@ async function processAsin(item, excelData) {
         'date' : 'Sat, 14 Feb 2026 12:36:45 GMT',
         'server' : 'Server',
         'strict-transport-security' : 'max-age=47474747; includeSubDomains; preload',
-        'vary' : 'Content-Type,Accept-Encoding,User-Agent',
         'via' : '1.1 5f4a9add208f485a5281bd59f72df5e6.cloudfront.net (CloudFront)',
         'x-amz-cf-id' : 'zbF8i2IBBwtaSuhmCK_udMCH9e_TzAo2SbSmboDoOU5VG_L85SEwRQ==',
         'x-amz-cf-pop' : 'DXB53-P3',
@@ -92,7 +93,7 @@ async function processAsin(item, excelData) {
     };
     headers.Referer = headers.Referer.replace('B0BJ1Q3HWZ',asin)
     try {
-        const url = 'https://www.amazon.de/acp/buffet-disclaimers-card/buffet-disclaimers-card-7f81ff53-6e78-44f9-a76f-2ae337b06462-1770860106391/getRspManufacturerContent?page-type=Detail&stamp=1771072578643';;
+        const url = 'https://www.amazon.de/acp/buffet-disclaimers-card/buffet-disclaimers-card-b6e3dc7f-d98b-4b66-bc67-28e573b83e6d-1771473167977/getRspManufacturerContent?page-type=Detail&stamp=1771674063858';
 
         let response = await axios.post(url, { asin }, {headers});
 
@@ -201,6 +202,66 @@ function detectData(data) {
     }
 
     return "address";
+}
+
+const userAgents = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5) Firefox/122.0",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) Mobile/15E148 Safari/604.1",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.86 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.224 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.2365.92",
+    "Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.2420.65",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
+    "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Safari/605.1.15",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1",
+    "Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36",
+    "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.165 Mobile Safari/537.36",
+    "Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/23.0 Chrome/120.0.6099.144 Mobile Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0",
+];
+
+const Referer = [
+    "https://www.google.com/",
+    "https://www.bing.com/",
+    "https://twitter.com/"
+];
+
+const Connection = [
+    "keep-alive",
+    "close",
+];
+const Accept = [
+    "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "application/json, text/plain, */*",
+];
+
+const Lang = [
+    "en-US,en;q=0.9",
+    "de-DE,de;q=0.9,en;q=0.8",
+    "fr-FR,fr;q=0.9",
+];
+
+function getRandomUA() {
+    return userAgents[Math.floor(Math.random() * userAgents.length)];
+}
+function getRandomReferer() {
+    return Referer[Math.floor(Math.random() * Referer.length)];
+}
+function getRandomConnection() {
+    return Connection[Math.floor(Math.random() * Connection.length)];
+}
+function getRandomLang() {
+    return Lang[Math.floor(Math.random() * Lang.length)];
+}
+
+function getRandomAccept() {
+    return Accept[Math.floor(Math.random() * Accept.length)];
 }
 
 // console.error(asins)

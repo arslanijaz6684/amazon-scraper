@@ -60,7 +60,12 @@ class FileController extends Controller
                 $jobEntry = ScrapeJob::create(['status' => 'pending']);
 
                 // Dispatch the Job with job ID
-                ScrapeAmazonJob::dispatch($jobEntry->id,$asins);
+                $data = array_chunk($asins, 100);
+                $jobs = [];
+                foreach ($data as $asins) {
+                    $jobs[] = new ScrapeAmazonJob($jobEntry->id, $asins);
+                }
+                \Bus::chain($jobs)->dispatch();
                 session()->put('scrape_job_id', $jobEntry->id);
                 return back()->with(['success' => 'Scraping started!']);
             }else{

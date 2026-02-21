@@ -32,15 +32,9 @@ class ScrapeAmazonJob implements ShouldQueue
         $jobEntry = ScrapeJob::find($this->jobId);
         try {
             $jobEntry->update(['status' => 'processing']);
-            $data = array_chunk($this->asinsData, 100);
-            $results = [];
-            foreach ($data as $asins) {
-                $result = $scraperService->processAsins($asins);
-                sleep(5);
-                \Log::info('Scrap Data: ', $result);
-                $results = array_merge($results, $result);
-            }
-            $results = collect($results)->map(function ($item) {
+
+            $result = $scraperService->processAsins($this->asinsData);
+            $results = collect($result)->map(function ($item) {
                 if (count($item['manufacturer']) === 0) {
                     $item['manufacturer'] = $this->getEmptyData();
                 }
@@ -51,11 +45,11 @@ class ScrapeAmazonJob implements ShouldQueue
                 $item['responsible'] = json_encode($item['responsible'] ?? []);
                 return $item;
             })->toArray();
-
-            AsinsData::upsert($results, ['asin'], ['manufacturer', 'responsible.']);
-
+            AsinsData::upsert($results, ['asin'], ['manufacturer', 'responsible']);
             $jobEntry->update(['status' => 'done']);
+            sleep(10);
         } catch (\Exception $e) {
+            \Log::error($e->getMessage());
             $jobEntry->update(['status' => 'failed']);
         }
     }
